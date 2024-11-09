@@ -1,0 +1,62 @@
+{% extends 'base/base.html' %}
+{% block title %}OS Level Information{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/os_info.css') }}">
+{% endblock %}
+{% block content %}
+<div class="os-info-container">
+    <h1 class="page-title">
+        <i class="fas fa-desktop me-3"></i>
+        System Information
+    </h1>
+    
+    <div class="info-card">
+        <table class="info-table">
+            <tbody>
+                <tr class="info-row">
+                    <td class="info-label">
+                        <i class="fas fa-code-branch info-icon"></i>
+                        Kernel Version
+                    </td>
+                    <td class="info-value">{{ os_info.kernel_version }}</td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-label">
+                        <i class="fas fa-desktop info-icon"></i>
+                        Operating System
+                    </td>
+                    <td class="info-value">{{ os_info.operating_system }}</td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-label">
+                        <i class="fas fa-tag info-icon"></i>
+                        OS Codename
+                    </td>
+                    <td class="info-value">{{ os_info.os_codename }}</td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-label">
+                        <i class="fas fa-info-circle info-icon"></i>
+                        OS Full Name
+                    </td>
+                    <td class="info-value">{{ os_info.os_full_name }}</td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-label">
+                        <i class="fas fa-laptop-code info-icon"></i>
+                        OS Name
+                    </td>
+                    <td class="info-value">{{ os_info.os_name }}</td>
+                </tr>
+                <tr class="info-row">
+                    <td class="info-label">
+                        <i class="fas fa-hashtag info-icon"></i>
+                        OS Version
+                    </td>
+                    <td class="info-value">{{ os_info.os_version }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

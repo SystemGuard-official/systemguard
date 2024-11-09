@@ -1,0 +1,95 @@
+/* General body styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f4f8; /* Light background */
+    color: #495057; /* Darker text for contrast */
+}
+
+/* Container for the main content */
+.content {
+    margin: 20px auto;
+    padding: 20px 50px;
+    background-color: #ffffff;
+    border-radius: 8px; /* Add rounded corners */
+}
+
+/* Header styles */
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important; /* Danger color */
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important; /* Warning color */
+    border-radius: 5px;
+    padding: 10px;
+}
+
+
+/* Pagination styles */
+.pagination {
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.page-link {
+    color: #007bff; /* Primary link color */
+}
+
+.page-link:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+/* Button styles */
+.btn {
+    border-radius: 5px;
+}
+
+.btn-info {
+    background-color: #17a2b8; /* Info button color */
+    border: none;
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #138496; /* Darker info on hover */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+/* Message container styles */
+.alert {
+    margin: 20px 0;
+    border-radius: 5px; /* Rounded corners */
+}
+
+/* Input styles */
+.form-control {
+    border-radius: 5px;
+    box-shadow: none; /* Remove default input shadow */
+}
+
+/* Input group styles */
+.input-group {
+    width: 100%;
+}
+
+/* Card-like design for tables */
+.table {
+    border-radius: 8px; /* Rounded corners */
+    overflow: hidden; /* Prevents inner elements from spilling out */
+}
+
+/* Add a subtle transition to buttons */
+.btn {
+    transition: transform 0.2s; /* Smooth transform effect */
+}
+
+.btn:hover {
+    transform: scale(1.05); /* Slightly enlarge button on hover */
+}

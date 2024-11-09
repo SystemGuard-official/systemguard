@@ -1,0 +1,863 @@
+{% extends "base/base.html" %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1"></script>
+{% endblock %}
+{% block title %}{{ title }} | {{ system_info.nodename }} {% endblock %}
+{% block content %}
+<div class="content">
+    <header class="bg-white mb-3">
+        <div id="message-container" class="fixed top-5 right-5 z-50"></div>
+        {% include 'ext/message.html' %}
+        <!-- Top status strip with advanced metrics -->
+        <div class="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b border-gray-200">
+            <div class="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-2">
+                <div class="flex items-center justify-between">
+                    <!-- Left Side -->
+                    <div class="flex items-center space-x-3">
+                        <!-- Health Status -->
+                        <div id="system-status"></div>
+                        <div id="network-status"></div>
+                        <div id="disk-status"></div>
+                    </div>
+
+                    <!-- Right Side -->
+
+                    <div class="flex items-center space-x-2 sm:space-x-4">
+                        <!-- Notification Button with Dropdown -->
+                        <div class="relative" x-data="{ isOpen: false }">
+                            <!-- Notification Button -->
+                            <button @click="isOpen = !isOpen"
+                                class="relative p-2.5 text-slate-500 hover:text-slate-700 bg-white hover:bg-slate-100 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                :aria-expanded="isOpen" aria-haspopup="true">
+
+                                <div class="alert-badge"></div>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                            </button>
+
+                            <!-- Notification Dropdown -->
+                            <div x-show="isOpen" @click.away="isOpen = false"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 translate-y-0"
+                                x-transition:leave-end="opacity-0 translate-y-1"
+                                class="absolute right-0 mt-3 w-80 origin-top-right">
+                                <div
+                                    class="rounded-2xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden">
+                                    <!-- Header -->
+                                    <!-- <div
+                                        class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+                                        <h3 class="text-sm font-semibold text-slate-900">Notifications</h3>
+                                        {% if notifications %}
+                                        <a href="#" class="text-xs font-medium text-blue-600 hover:text-blue-700">Mark
+                                            all as read</a>
+                                        {% endif %}
+                                    </div> -->
+
+                                    <!-- Notifications List -->
+                                    <div class="max-h-96 overflow-y-auto" id="notification-container">
+                                        <!-- Notifications will be populated here -->
+                                    </div>
+
+                                    <!-- {% if notifications %}
+                                    <div class="border-t border-slate-100 bg-slate-50/80">
+                                        <a href="#"
+                                            class="block px-4 py-3 text-sm font-medium text-center text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors duration-150">
+                                            View all notifications
+                                        </a>
+                                    </div>
+                                    {% endif %} -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documentation -->
+                        <a href="https://systemguard.readthedocs.io/en/latest/"
+                            class="hidden sm:flex items-center px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            <span>Documentation</span>
+                        </a>
+
+                        <!-- Support -->
+                        <a href="{{ url_for('support') }}"
+                            class="hidden sm:flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-full transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            <span>Support</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main header content -->
+        <div class="mx-auto">
+            <div class="px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                    <!-- Server Identity Section -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                        <!-- Primary Server Info -->
+                        <div class="flex items-center">
+                            <div class="relative">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg transform transition-transform duration-200 hover:scale-105">
+                                    <i class="fas fa-server text-white text-2xl"></i>
+                                </div>
+                                <div
+                                    class="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-green-100 border-2 border-white flex items-center justify-center ring-2 ring-green-50">
+                                    <div class="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></div>
+                                </div>
+                            </div>
+                            <div class="ml-5">
+                                <div class="flex items-center space-x-3">
+                                    {% if system_info.instance_metadata['public_ipv4'] %}
+                                        <h2 class="text-xl font-bold text-gray-900">{{ system_info.instance_metadata['public_ipv4'] }}</h2>
+                                    {% else %}
+                                        <h2 class="text-xl font-bold text-gray-900">{{ system_info.ipv4_connections }}</h2>
+                                    {% endif %}
+                                    <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full border border-blue-200">Primary</span>
+                                </div>
+                                    <p class="text-sm text-gray-600 mt-0.5 font-medium">{{ system_info.system_username }}@{{system_info.nodename }}
+                                </p>
+                            </div>
+                        </div>
+
+                        {% if system_info.instance_metadata['region_name'] %}
+                        <div
+                            class="flex items-center px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm transition-all duration-200 hover:border-indigo-200 hover:shadow-md">
+                                <i class="fas fa-hdd text-indigo-500 mr-2.5 text-lg"></i>
+                            <span class="text-sm font-semibold text-gray-700">Server Region: {{
+                                system_info.instance_metadata['region_name'] }}</span>
+                        </div>
+                        <!-- instance_type -->
+                        <div
+                            class="flex items-center px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm transition-all duration-200 hover:border-indigo-200 hover:shadow-md">
+                            <i class="fas fa-cloud text-indigo-500 mr-2.5 text-lg"></i>
+                            <span class="text-sm font-semibold text-gray-700">Instance Type: {{
+                                system_info.instance_metadata['instance_type'] }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Time and Actions Section -->
+                    <div class="flex items-center justify-between sm:justify-end gap-4">
+                        <!-- Action Buttons -->
+                        <div class="flex items-center space-x-3">
+                            <button
+                                class="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-all duration-200 hover:shadow-md">
+                                <a href="{{ url_for('settings')}}" class="text-sm font-medium">
+                                    <i class="fas fa-cog text-lg"></i>
+                                </a>
+                            </button>
+                            <!-- refresh button which call an get request on /api/v1/ec2_metadata -->
+                            <button
+                                class="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-all duration-200 hover:shadow-md"
+                                onclick="fetch('/api/v1/ec2_metadata').then(response => response.json()).then(data => console.log(data)).catch(error => console.error('Error:', error));"
+                                title="Update EC2 Metadata">
+                                <i class="fas fa-sync text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </header>
+    <!-- Main Grid Section -->
+    <div class="metrics-grid">
+        {% set metrics = [
+        {
+        'name': 'CPU Status',
+        'primary_value': system_info.cpu_percent,
+        'primary_unit': '%',
+        'primary_label': 'Utilization',
+        'primary_class': 'cpu-percent',
+        'details': [
+        {'label': 'Cores', 'value': system_info.cpu_core},
+        {'label': 'Frequency', 'value': system_info.cpu_frequency, 'unit': 'GHz', 'class': 'cpu-frequency'},
+        {'label': 'Max Frequency', 'value': system_info.cpu_max_frequency, 'unit': 'GHz'}
+        ]
+        },
+        {
+        'name': 'Memory Status',
+        'primary_value': system_info.memory_percent,
+        'primary_unit': '%',
+        'primary_label': 'Memory Usage',
+        'primary_class': 'memory-percent',
+        'details': [
+        {'label': 'Used', 'value': system_info.memory_used, 'class': 'memory-used'},
+        {'label': 'Available', 'value': system_info.memory_available},
+        {'label': 'Swap', 'value': system_info.swap_memory, 'unit': '%'}
+        ]
+        },
+        {
+        'name': 'Storage Status',
+        'primary_value': system_info.disk_percent,
+        'primary_unit': '%',
+        'primary_label': 'Disk Usage',
+        'primary_class': 'disk-percent',
+        'details': [
+        {'label': 'Total', 'value': system_info.disk_total},
+        {'label': 'Used', 'value': system_info.disk_used, 'class': 'disk-used'},
+        {'label': 'Free', 'value': system_info.disk_free, 'class': 'disk-free'}
+        ]
+        },
+        {
+        'name': 'Battery Status',
+        'primary_value': system_info.battery_percent,
+        'primary_unit': '%',
+        'primary_label': 'Battery Level',
+        'primary_class': 'battery-percent',
+        'details': [
+        {'label': 'Status', 'value': system_info.battery_status, 'class': 'battery-status'},
+        {'label': 'Health', 'value': system_info.battery_health, 'class': 'battery-health'}
+        ]
+        }
+        ] %}
+
+        {% for metric in metrics %}
+        <div class="metric-card">
+            <div class="card-header">
+                <h3>{{ metric.name }}</h3>
+                <span class="refresh-indicator"></span>
+            </div>
+            <div class="card-content">
+                <div class="metric-primary">
+                    <div class="metric-value">
+                        <span class="large-number {% if metric.primary_class %}{{ metric.primary_class }}{% endif %}">
+                            {{ metric.primary_value }}
+                        </span>
+                        <span class="unit">{{ metric.primary_unit }}</span>
+                    </div>
+                    <div class="metric-label">{{ metric.primary_label }}</div>
+                </div>
+                <div class="metric-details">
+                    {% for detail in metric.details %}
+                    <div class="detail-item">
+                        <span class="detail-label">{{ detail.label }}:</span>
+                        <span class="detail-value {% if detail.class %}{{ detail.class }}{% endif %}">
+                            {{ detail.value }}{% if detail.unit %}{{ detail.unit }}{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="details-grid font-sans">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- System Information Card -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div class="flex items-center justify-between p-4 border-b border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-xl font-semibold text-gray-800 p-2">System Information</h3>
+                    </div>
+                    <span class="refresh-indicator text-gray-400 hover:text-gray-600 cursor-pointer" title="Refresh">
+                    </span>
+                </div>
+    
+                <div class="p-4">
+                    <div class="space-y-4">
+                        {% for label, value, class in [
+                        ("OS", system_info.os_info.os_full_name, 'system-info'),
+                        ("Processor Name", system_info.processor_name, 'processor-name'),
+                        ("Process Count", system_info.process_count, 'process-count'),
+                        ("Kernel Version", system_info.os_info.kernel_version, 'kernel-version')
+                        ] %}
+                        <div class="group bg-gray-50 rounded-lg p-4 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-300 transition-all duration-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                        <i class="fas fa-desktop text-blue-500 text-lg"></i>
+                                    <span class="text-base text-gray-700 font-medium">{{ label }}</span>
+                                </div>
+                                <span class="text-base font-semibold text-gray-800 {{ class }} font-mono">{{ value }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Product Information Card -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div class="flex items-center justify-between p-4 border-b border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-xl font-semibold text-gray-800 p-2">Product Information</h3>
+                    </div>
+                    <span class="refresh-indicator text-gray-400 hover:text-gray-600 cursor-pointer" title="Refresh">
+                    </span>
+                </div>
+    
+                <div class="p-4">
+                    <div class="space-y-4">
+                        {% for label, value in [
+                        ("Product Name", title + " " + plan_type + " (" + version + ")"),
+                        ("Unique ID", systemguard_unique_id),
+                        ("Remaining Days", remaining_plan_days),
+                        ("Username", system_info.system_username)
+                        ] %}
+                        <div class="group bg-gray-50 rounded-lg p-4 hover:bg-gradient-to-r hover:from-purple-100 hover:to-purple-300 transition-all duration-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                        <i class="fas fa-tag text-purple-500 text-lg"></i>
+                                    <span class="text-base text-gray-700 font-medium">{{ label }}</span>
+                                </div>
+                                <span class="text-base font-semibold text-gray-800 font-mono">{{ value }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+
+    <!-- Top Process running -->
+    <div class="details-grid">
+        <div class="metric-card">
+            <div class="card-header">
+                <h3>Top Processes</h3>
+                <span class="refresh-indicator"></span>
+            </div>
+            <div class="card-content">
+                <div class="process-grid">
+                    {% for process in system_info.top_processes %}
+                    <div class="process-item">
+                        <span class="process-name">{{ process[0] }}</span>
+                        <span class="process-cpu">CPU: {{ process[1] }}%</span>
+                        <span class="process-memory">Memory: {{ process[2] }}%</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="process-footer">
+                    <a href="{{ url_for('process') }}" class="view-all">View All Processes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- service monitor -->
+    <div class="details-grid">
+        <div class="metric-card">
+            <div class="card-header">
+                <h3>Service Monitor</h3>
+                <div class="header-actions">
+                    <select id="rowsPerPage" class="form-select" style="width: 200px;">
+                        <option value="5">5 Rows</option>
+                        <option value="10">10 Rows</option>
+                        <option value="20">20 Rows</option>
+                    </select>
+                </div>
+                <a href="{{ url_for('show_system_services') }}" class="view-all">
+                    View Service Details
+                </a>
+            </div>
+            <div class="card-content">
+                <div class="container">
+                    <div class="filter-section">
+                        <select id="categoryFilter">
+                            <option value="all">All Categories</option>
+                        </select>
+                    </div>
+                    <div class="table-container">
+                        <table id="servicesTable">
+                            <thead>
+                                <tr>
+                                    <th>PID</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>CPU (%)</th>
+                                    <th>Memory (MB)</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- api metrics -->
+        <!-- Add this to your metrics-grid section in homepage -->
+        <div class="metric-card">
+            <div class="card-header">
+                <h3>API Metrics</h3>
+                <div class="header-actions">
+                    <select id="apiMetricSelector" class="form-select" style="width: 200px;">
+                        <option value="">Select a metric</option>
+                    </select>
+                    <select id="apiEndpointSelector" class="form-select" style="width: 200px;" disabled>
+                        <option value="">Select an endpoint</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-content">
+                <div id="apiMetricsLoading" class="loading-indicator">Loading...</div>
+
+                <div id="apiMetricsPlaceholder" class="api-metrics-placeholder">
+                    <div class="placeholder-content">
+                        <i class="fas fa-filter placeholder-icon"></i>
+                        <p>Please select a metric and endpoint to view the API metrics dashboard</p>
+                        <div class="placeholder-steps">
+                            <div class="step">
+                                <span class="step-number">1</span>
+                                <span class="step-text">Choose a metric from the dropdown</span>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">2</span>
+                                <span class="step-text">Select an endpoint to analyze</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="apiMetricsContent" class="api-metrics-content">
+                    <div class="metrics-summary">
+                        <div class="metric-item">
+                            <div class="metric-value">
+                                <span class="large-number" id="apiTotalCount">-</span>
+                            </div>
+                            <div class="metric-label">Total Request</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">
+                                <span class="large-number" id="apiTotalSum">-</span>
+                                <span class="unit">s</span>
+                            </div>
+                            <div class="metric-label">Total Duration</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value">
+                                <span class="large-number" id="apiAvgDuration">-</span>
+                                <span class="unit">s</span>
+                            </div>
+                            <div class="metric-label">Average Duration</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="apiHistogramChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="details-grid">
+
+        <div class="docker metric-card">
+            <div class="card-header">
+                <h3>Docker Containers</h3>
+
+            </div>
+            <div class="card-content">
+                <div class="container-grid">
+                    <div class="loader text-center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="details-grid">
+
+        <!-- Network Section -->
+        <!-- <div class="metric-card">
+            <div class="card-header">
+                <h3>Disk and Network Status</h3>
+                <span class="refresh-indicator"></span>
+            </div>
+
+            <div class="card-content">
+                <div class="network-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon download"></span>
+                        <div class="stat-details">
+                            <div class="stat-value">
+                                <span class="network-received">{{ system_info.network_received }}</span>
+                                <span class="speed-indicator download-speed">{{ system_info.download_speed }}
+                            </div>
+                            <span class="stat-label">Downloaded</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon upload"></span>
+                        <div class="stat-details">
+                            <div class="stat-value">
+                                <span class="network-sent">{{ system_info.network_sent }}</span>
+                                <span class="speed-indicator upload-speed">{{ system_info.upload_speed }}
+                            </div>
+                            <span class="stat-label">Uploaded</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-item">
+                        <span class="stat-icon floppy-disk"></span>
+                        <div class="stat-details">
+                            <div class="stat-value">
+                                <span class="disk-read">{{ system_info.disk_read }}</span>
+                                <span class="speed-indicator disk-read-per-sec">{{ system_info.disk_read_per_sec
+                                    }}</span>
+                            </div>
+                            <span class="stat-label">Disk Read</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-item">
+                        <span class="stat-icon floppy-disk"></span>
+                        <div class="stat-details">
+                            <div class="stat-value">
+                                <span class="disk-write">{{ system_info.disk_write }}</span>
+                                <span class="speed-indicator disk-write-per-sec">{{ system_info.disk_write_per_sec
+                                    }}</span>
+                            </div>
+                            <span class="stat-label">Disk Write</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div> -->
+    </div>
+
+    <!-- System Details Section -->
+    <div class="details-grid">
+        <!-- users information -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <!-- Card Header -->
+            <div class="border-b border-gray-200 p-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">Users Information</h3>
+                    <span class="animate-pulse h-2 w-2 bg-green-500 rounded-full"></span>
+                </div>
+            </div>
+
+            <!-- Card Content -->
+            <div class="p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                    {% for label, value, icon_class, item_class in [
+                    ("Total Users", system_info.total_users ~ " / " ~ max_users_allowed, "fas fa-users", "total-users"),
+                    ("Admin Users", system_info.admin_users, "fas fa-user-shield", "admin-users"),
+                    ("Active Users", system_info.active_users, "fas fa-user", "active-users"),
+                    ("Inactive Users", system_info.inactive_users, "fas fa-user-slash", "inactive-users")
+                    ] %}
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <div class="flex items-center gap-3">
+                            <!-- Icon mapping -->
+                            {% if "fa-users" in icon_class %}
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            {% elif "fa-user-shield" in icon_class %}
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            {% elif "fa-user-slash" in icon_class %}
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                            </svg>
+                            {% else %}
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            {% endif %}
+
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-blue-900">{{ label }}</p>
+                                <p class="text-xl font-bold text-blue-700 {{ item_class }}">{{ value }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if system_info.active_alertmanagers %}
+                <div class="mt-4">
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <div class="flex items-start gap-3">
+                            <svg class="h-5 w-5 text-blue-500 mt-1" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-blue-900">Active Alert Managers</p>
+                                {% for alertmanager in system_info.active_alertmanagers %}
+                                <p class="text-xl font-bold text-blue-700 active-alertmanagers mt-1">{{
+                                    alertmanager["url"] }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- other information -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <!-- Card Header -->
+            <div class="border-b border-gray-200 p-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">Other Information</h3>
+                    <span class="animate-pulse h-2 w-2 bg-green-500 rounded-full"></span>
+                </div>
+            </div>
+
+            <!-- Card Content -->
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Total Tickets -->
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-blue-900">Total Tickets</p>
+                                <p class="text-xl font-bold text-blue-700 total-tickets">
+                                    {{ system_info.total_tickets }} / {{ monthly_alert_tickets_limit }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Alert Rules -->
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-blue-900">Total Alert Rules</p>
+                                <p class="text-xl font-bold text-blue-700 total-rules">
+                                    {{ system_info.total_rules }} / {{ max_alert_rules }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Scraping Targets -->
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-blue-900">Total Scraping Targets</p>
+                                <p class="text-xl font-bold text-blue-700 total-targets">
+                                    {{ system_info.total_targets }} / {{ max_scrap_target }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Charts -->
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-blue-900">Total Charts</p>
+                                <p class="text-xl font-bold text-blue-700 total-charts">
+                                    {{ system_info.total_charts }} / {{ max_number_of_graphs }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Charts -->
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-blue-900">Active Charts</p>
+                                <p class="text-xl font-bold text-blue-700 active-charts">
+                                    {{ system_info.active_charts }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="details-grid">
+        <!-- ticket statistics -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            {% if plan_type != "Enterprise" %}
+            <div class="border-b border-gray-200 p-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">Enterprise Dashboard</h3>
+                    <span class="animate-pulse h-2 w-2 bg-red-500 rounded-full"></span>
+                </div>
+                <div class="p-4 bg-red-50 rounded-lg mt-4">
+                    <p class="text-sm font-medium text-red-700">{{ title }} Enterprise is required to access this page.
+                    </p>
+                    <a href="{{ url_for('activation') }}" class="text-blue-600 hover:text-blue-800">Upgrade to
+                        Enterprise</a>
+                </div>
+            </div>
+            {% else %}
+            <div class="border-b border-gray-200 p-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">Tickets Statistics</h3>
+                    <span class="animate-pulse h-2 w-2 bg-green-500 rounded-full"></span>
+                </div>
+            </div>
+
+
+            <!-- Content -->
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Primary Metrics -->
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-blue-900">Open Tickets</p>
+                                <p class="text-2xl font-bold text-blue-700">{{ system_info.open_tickets }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 rounded-lg p-4 border border-green-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-green-900">Closed Tickets</p>
+                                <p class="text-2xl font-bold text-green-700">{{ system_info.closed_tickets }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-purple-900">In Progress Tickets</p>
+                                <p class="text-2xl font-bold text-purple-700">{{ system_info.in_progress_tickets }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-900">Resolved Tickets</p>
+                                <p class="text-2xl font-bold text-yellow-700">{{ system_info.resolved_tickets }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="my-6 border-t border-gray-200"></div>
+
+                <!-- Priority Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-red-50 rounded-lg p-4 border border-red-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-red-900">Critical Tickets</p>
+                                <p class="text-2xl font-bold text-red-700">{{ system_info.critical_tickets }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-900">Warning Tickets</p>
+                                <p class="text-2xl font-bold text-yellow-700">{{ system_info.warning_tickets }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <div class="flex items-center gap-3">
+                            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-blue-900">Info Tickets</p>
+                                <p class="text-2xl font-bold text-blue-700">{{ system_info.info_tickets }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="metric-card">
+            <div class="card-header">
+                <h3>System Metrics History</h3>
+                <span class="refresh-indicator"></span>
+            </div>
+            <div class="card-content">
+                <canvas id="system-metrics"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/homepage.js')}}"></script>
+{% endblock %}

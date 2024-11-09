@@ -1,0 +1,218 @@
+/* Variables and Root Settings */
+:root {
+    --sidebar-width: 300px;
+    --sidebar-width-mobile: 280px;
+    --primary-color: #2563eb;
+    --primary-light: #3b82f6;
+    --primary-lighter: #60a5fa;
+    --sidebar-bg: #ffffff;
+    --sidebar-header-bg: #2563eb;
+    --sidebar-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    --hover-bg: #f0f7ff;
+    --hover-border: #2563eb;
+    --text-primary: #1e3a8a;
+    --text-secondary: #3b82f6;
+    --text-light: #ffffff;
+    --transition-speed: 0.3s;
+    --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+    --icon-size: 1.5rem;
+    --blur-strength: 4px;
+}
+
+/* Sidebar Container */
+.sidebar {
+    position: fixed;
+    left: calc(-1 * var(--sidebar-width));
+    top: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: var(--sidebar-bg);
+    color: var(--text-primary);
+    transition: transform var(--transition-speed) var(--transition-timing),
+                left var(--transition-speed) var(--transition-timing);
+    z-index: 1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: var(--sidebar-shadow);
+    border-right: 1px solid rgba(37, 99, 235, 0.1);
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+}
+
+/* Custom Scrollbar Styles */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: var(--primary-light);
+    border-radius: 3px;
+}
+
+/* Active State */
+.sidebar.active {
+    transform: translateX(var(--sidebar-width));
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: var(--text-light);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+}
+
+/* Feature List Container */
+.feature-list {
+    padding: 0.75rem 0;
+    position: relative;
+}
+
+.feature-list:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1.5rem;
+    right: 1.5rem;
+    height: 1px;
+    background: rgba(37, 99, 235, 0.1);
+}
+
+/* Feature Item */
+.feature-element {
+    padding: 0.875rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-speed) var(--transition-timing);
+    border-left: 3px solid transparent;
+    position: relative;
+    user-select: none;
+}
+
+/* Hover Effects */
+.feature-element:hover {
+    background-color: var(--hover-bg);
+    border-left-color: var(--hover-border);
+}
+
+.feature-element:hover i {
+    transform: scale(1.1);
+    color: var(--primary-color);
+}
+
+/* Active State */
+.feature-element.active {
+    background-color: var(--hover-bg);
+    border-left-color: var(--hover-border);
+}
+
+.feature-element.active i {
+    color: var(--primary-color);
+}
+
+.feature-element.active span {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* Icon Styles */
+.feature-element i {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: transform var(--transition-speed) var(--transition-timing),
+                color var(--transition-speed) var(--transition-timing);
+}
+
+/* Text Styles */
+.feature-element span {
+    font-weight: 500;
+    color: var(--text-primary);
+    transition: color var(--transition-speed) var(--transition-timing);
+}
+
+/* Toggle Button */
+.sidebar-toggle {
+    
+    left: 1rem;
+    top: 1rem;
+    z-index: 1001;
+    padding: 0.75rem 1.25rem;
+    background: #fff;
+    color: rgb(0, 0, 0);   
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.2s;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+
+}
+
+.sidebar-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+}
+
+/* Overlay */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(var(--blur-strength));
+    -webkit-backdrop-filter: blur(var(--blur-strength));
+    z-index: 999;
+    opacity: 0;
+    transition: opacity var(--transition-speed) var(--transition-timing);
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: var(--sidebar-width-mobile);
+        left: calc(-1 * var(--sidebar-width-mobile));
+    }
+
+    .sidebar.active {
+        transform: translateX(var(--sidebar-width-mobile));
+    }
+
+    .feature-element {
+        padding: 0.75rem 1.25rem;
+    }
+
+    .sidebar-header {
+        padding: 1.25rem;
+    }
+}

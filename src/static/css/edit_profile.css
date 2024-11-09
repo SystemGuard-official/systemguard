@@ -1,0 +1,161 @@
+  :root {
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+    --background-color: #f8fafc;
+    --card-background: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --success-color: #22c55e;
+  }
+
+  body {
+    background-color: var(--background-color);
+    color: var(--text-primary);
+  }
+
+  .profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+  }
+
+  .profile-card {
+    background: var(--card-background);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    padding: 2.5rem;
+  }
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .profile-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .profile-header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-group i {
+    color: var(--primary-color);
+    margin-right: 0.5rem;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+  }
+
+  .form-control:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  .form-control::placeholder {
+    color: #94a3b8;
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: #f8fafc;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease;
+  }
+
+  .checkbox-group:hover {
+    background-color: #f1f5f9;
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.25rem;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    accent-color: var(--primary-color);
+  }
+
+  .checkbox-group label {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+
+  .save-button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .save-button:hover {
+    background-color: var(--primary-hover);
+  }
+
+  .alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert-success {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: var(--success-color);
+  }
+
+  @media (max-width: 640px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-card {
+      padding: 1.5rem;
+    }
+  }

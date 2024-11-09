@@ -1,0 +1,249 @@
+:root {
+    --primary-color: #6200ea; /* Main color */
+    --primary-light: #9d46ff; /* Lighter shade */
+    --primary-dark: #0a00b6; /* Darker shade */
+    --secondary-color: #00e676; /* Green for success */
+    --background-color: #f5f5f5; /* Light background */
+    --card-background: #ffffff; /* White for cards */
+    --text-color: #333333; /* Main text color */
+    --light-text-color: #757575; /* Light text color */
+    --border-color: #e0e0e0; /* Light border color */
+    --toggle-bg: #bdbdbd; /* Default toggle background */
+    --toggle-bg-checked: #00e676; /* Checked toggle background */
+    --hover-effect: rgba(0, 0, 0, 0.1); /* Hover shadow effect */
+    --button-hover: #0056b3; /* Button hover color */
+    --button-danger-hover: #c82333; /* Danger button hover color */
+}
+
+h1 {
+    text-align: center;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.col-md-4 {
+    flex: 0 0 33.33%;
+    padding: 10px;
+}
+
+.card {
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px var(--hover-effect);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 20px var(--hover-effect);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.actions {
+    margin-top: 10px;
+}
+
+.btn-edit, .btn-delete {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-edit {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: var(--button-hover);
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: var(--button-danger-hover);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px var(--hover-effect);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: var(--primary-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.optional-fields {
+    display: none; /* Hide optional fields initially */
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(98, 0, 234, 0.5);
+}
+
+.toggle-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.toggle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.toggle-group {
+    background-color: #f9f9f9;
+    padding: 1rem;
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease;
+}
+
+.toggle-group:hover {
+    box-shadow: 0 4px 8px var(--hover-effect);
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.toggle input {
+    display: none;
+}
+
+.slider {
+    position: relative;
+    width: 60px;
+    height: 34px;
+    background-color: var(--toggle-bg);
+    border-radius: 34px;
+    transition: background-color 0.3s;
+}
+
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+input:checked + .slider {
+    background-color: var(--toggle-bg-checked);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+input[type="range"] {
+    -webkit-appearance: none; /* Remove default styling */
+    width: 100%;
+    height: 8px;
+    background: #ddd;
+    border-radius: 5px;
+    outline: none;
+    margin: 10px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #4CAF50; /* Slider thumb color */
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #4CAF50; /* Slider thumb color */
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+input[type="range"]::-ms-thumb {
+    width: 20px;
+    height: 20px;
+    background: #4CAF50; /* Slider thumb color */
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Optional: Style output to match the sliders */
+output {
+    display: inline-block;
+    margin-left: 10px;
+    font-weight: bold;
+}
+

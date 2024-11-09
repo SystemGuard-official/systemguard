@@ -1,0 +1,239 @@
+{% extends 'base/base.html' %}
+{% block title %}Histogram Metrics{% endblock %}
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bucket_metrics.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>API Metrics Dashboard</h1>
+        <select id="metricSelector" class="endpoint-selector">
+            <option value="">Select a metric</option>
+        </select>
+        <select id="endpointSelector" class="endpoint-selector" disabled>
+            <option value="">Select an endpoint</option>
+        </select>
+    </div>
+
+    <div id="loading" class="loading">Loading...</div>
+
+    <div id="initialMessage" class="initial-message">
+        Please select a metric and an endpoint to view the data.
+    </div>
+
+    <div id="dashboardContent" class="dashboard-content">
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2 class="card-title">Summary Statistics</h2>
+                <table class="stats-table">
+                    <tbody id="summaryStats">
+                        <tr>
+                            <td>Total Request Count</td>
+                            <td id="totalCount">-</td>
+                        </tr>
+                        <tr>
+                            <td>Total Sum (seconds)</td>
+                            <td id="totalSum">-</td>
+                        </tr>
+                        <tr>
+                            <td>Average Duration (seconds)</td>
+                            <td id="avgDuration">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Response Time Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="histogramChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Detailed Metrics</h2>
+            <table class="stats-table" id="metricsTable">
+                <thead>
+                    <tr>
+                        <th>Duration (seconds)</th>
+                        <th>Request Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let histogramChart = null;
+    const metricsData = {};
+    const metricToEndpoints = {};
+
+    async function fetchEndpoints() {
+        const response = await fetch('/api/v1/histogram/endpoints');
+        const endpoints = await response.json();
+
+        // Reorganize data to group by metrics instead of endpoints
+        for (const [endpoint, metrics] of Object.entries(endpoints)) {
+            metrics.forEach(metric => {
+                if (!metricToEndpoints[metric]) {
+                    metricToEndpoints[metric] = [];
+                }
+                metricToEndpoints[metric].push(endpoint);
+            });
+        }
+
+        // Populate metric selector
+        const metricSelector = document.getElementById('metricSelector');
+        Object.keys(metricToEndpoints).sort().forEach(metric => {
+            const option = document.createElement('option');
+            option.value = metric;
+            option.textContent = metric;
+            metricSelector.appendChild(option);
+        });
+    }
+
+    function populateEndpointSelector(metric) {
+        const endpointSelector = document.getElementById('endpointSelector');
+        endpointSelector.innerHTML = '<option value="">Select an endpoint</option>';
+        const endpoints = metricToEndpoints[metric];
+
+        if (endpoints) {
+            endpoints.sort().forEach(endpoint => {
+                const option = document.createElement('option');
+                option.value = endpoint;
+                option.textContent = endpoint;
+                endpointSelector.appendChild(option);
+            });
+            endpointSelector.disabled = false;
+        } else {
+            endpointSelector.disabled = true;
+        }
+    }
+
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+
+    function showDashboard(show) {
+        document.getElementById('initialMessage').style.display = show ? 'none' : 'block';
+        document.getElementById('dashboardContent').style.display = show ? 'block' : 'none';
+    }
+
+    function updateSummaryStats(data) {
+        document.getElementById('totalCount').textContent = data.count.toFixed(2);
+        document.getElementById('totalSum').textContent = data.sum.toFixed(2);
+        document.getElementById('avgDuration').textContent = data.average.toFixed(3);
+    }
+
+    function updateMetricsTable(buckets) {
+        const tbody = document.querySelector('#metricsTable tbody');
+        tbody.innerHTML = '';
+
+        buckets.forEach(bucket => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>≤ ${bucket.le}</td>
+                    <td>${bucket.value}</td>
+                `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function updateHistogramChart(buckets) {
+        const ctx = document.getElementById('histogramChart').getContext('2d');
+
+        if (histogramChart) {
+            histogramChart.destroy();
+        }
+
+        histogramChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: buckets.map(b => b.le),
+                datasets: [{
+                    label: 'Request Count',
+                    data: buckets.map(b => b.value),
+                    backgroundColor: 'rgba(74, 144, 226, 0.6)',
+                    borderColor: 'rgba(74, 144, 226, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Time distribution (seconds)' 
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Request Count'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async function fetchMetrics(endpoint, metricName) {
+        showLoading(true);
+        showDashboard(false);
+
+        try {
+            if (endpoint === '/') {
+                endpoint = 'root';
+            }
+            const response = await fetch(`/api/v1/histogram/data/${endpoint}/${metricName}`);
+            const data = await response.json();
+
+            if (data.error) {
+                alert('Error loading metrics: ' + data.error);
+                return;
+            }
+
+            updateSummaryStats(data);
+            updateMetricsTable(data.buckets);
+            updateHistogramChart(data.buckets);
+            showDashboard(true);
+        } catch (error) {
+            console.error('Error fetching metrics:', error);
+            alert('Error loading metrics data');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    document.getElementById('metricSelector').addEventListener('change', (e) => {
+        const metric = e.target.value;
+        populateEndpointSelector(metric);
+        document.getElementById('endpointSelector').value = '';
+        showDashboard(false);
+    });
+
+    document.getElementById('endpointSelector').addEventListener('change', (e) => {
+        const endpoint = e.target.value;
+        const metricName = document.getElementById('metricSelector').value;
+
+        if (endpoint && metricName) {
+            fetchMetrics(endpoint, metricName);
+        } else {
+            showDashboard(false);
+        }
+    });
+
+    // Initialize
+    fetchEndpoints();
+    showDashboard(false);
+</script>
+{% endblock %}
