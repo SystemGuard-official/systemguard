@@ -3,6 +3,69 @@
 
 {% block content %}
 {% include 'ext/message.html' %}
+<style>
+    h1 {
+        font-weight: 900;
+        font-size: 2.5rem;
+    }
+
+    h2 {
+        font-weight: 800;
+        font-size: 1.75rem;
+    }
+
+    h3 {
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+
+    h4 {
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        border: 1px solid #e5e7eb;
+        /* Light gray border */
+        padding: 0.5rem;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f3f4f6;
+        /* Light gray header background */
+        font-weight: bold;
+    }
+
+    .prose ul,
+    .prose ol {
+        margin-left: 1.5rem;
+        /* Add left margin for proper indentation */
+        margin-bottom: 1rem;
+        /* Add spacing below lists */
+        list-style-position: outside;
+        /* Ensure bullet points or numbers are outside the text */
+        list-style-type: disc;
+        /* Default bullet style for unordered lists */
+    }
+
+    .prose ol {
+        list-style-type: decimal;
+        /* Default style for ordered lists */
+    }
+
+    .prose ul li,
+    .prose ol li {
+        margin-bottom: 0.5rem;
+        /* Add spacing between list items */
+    }
+</style>
 <div class="bg-gray-50 min-h-screen" x-data="{ activeTab: 'home' }">
     <!-- Header -->
     <header class="bg-white border-b sticky top-0 z-50 shadow-md">
@@ -178,7 +241,7 @@
 
                                 <!-- Post Content -->
                                 <div class="prose max-w-none" x-show="!isEditing">
-                                    <div class="whitespace-pre-line">{{ post.content | markdown | safe }}</div>
+                                    <div class="leading-relaxed whitespace-pre-line">{{ post.content | markdown | safe }}</div>
                                 </div>
 
                                 <!-- Edit Form -->
@@ -348,7 +411,7 @@
                                         </button>
                                     </form>
                                 </div>
-                                <p class="text-gray-800">{{ post.content | markdown | safe }}</p>
+                                <div class="leading-relaxed whitespace-pre-line text-gray-800">{{ post.content | markdown | safe }}</div>
                                 <div class="flex items-center space-x-6 mt-4 text-sm text-gray-500">
                                     <span class="flex items-center">
                                         <i class="fas fa-heart text-red-500 mr-2"></i>
@@ -494,7 +557,7 @@
                                         </form>
                                     </div>
                                 </div>
-                                <p class="text-gray-800">{{ post.content | markdown | safe }}</p>
+                                <div class="leading-relaxed whitespace-pre-line text-gray-800">{{ post.content | markdown | safe }}</div>
                                 <div class="flex items-center space-x-6 mt-4 text-sm text-gray-500">
                                     <span class="flex items-center">
                                         <i class="fas fa-heart text-red-500 mr-2"></i>
@@ -542,7 +605,7 @@
                                     class="w-8 h-8 rounded-full ring-2 ring-blue-100">
                                 <p class="text-sm font-medium text-gray-900">{{ post.user.first_name }}</p>
                             </div>
-                            <p class="text-sm text-gray-600 line-clamp-2">{{ post.content[:100] | markdown | safe }}...</p>
+                            <div class="text-sm text-gray-600 line-clamp-2">{{ post.content[:200]  }}...</div>
                             {% if post.tags %}
                             <div class="flex items center space-x-2 mt-2 text-sm text-gray-500">
                                 <i class="fas fa-tags text-gray-400"></i>
